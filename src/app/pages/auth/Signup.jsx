@@ -3,9 +3,11 @@ import React from 'react'
 import { Form } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import * as yup from 'yup'
+import { authSignup } from '../../slices/auth.slice'
+import { useDispatch } from 'react-redux'
 
 const Signup = () => {
-
+    const dispatch = useDispatch();
     const validateFields = yup.object().shape({
         name: yup.string().required('Enter name'),
         email: yup.string()
@@ -41,9 +43,15 @@ const Signup = () => {
         validationSchema: validateFields,
         onSubmit: (values) => {
             console.log('values:- ', values);
+            values.user_role = 1;
+            dispatch(authSignup(values)).unwrap().then(() => {
+                
+            }).catch(() => {
+                
+            })
         }
     });
-    
+
     return (
         <main>
             <div className="container">

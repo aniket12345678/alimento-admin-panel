@@ -11,8 +11,8 @@ const Signin = () => {
             .required('Enter email'),
         password: yup.string()
             .min(6, 'Less than 6 characters')
-            .matches(/(?=.*[a-z])\w+/, "Password ahould contain at least one lowercase character")
-            .matches(/(?=.*[A-Z])\w+/, "Password ahould contain at least one uppercase character")
+            .matches(/(?=.*[a-z])\w+/, "Password should contain at least one lowercase character")
+            .matches(/(?=.*[A-Z])\w+/, "Password should contain at least one uppercase character")
             .matches(/\d/, "Password should contain at least one number")
             .matches(/[`!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?~]/, "Password should contain at least one special character")
             .max(20, 'More than 20 characters')
