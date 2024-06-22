@@ -1,7 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import PropTypes from 'prop-types'
-import { Row, Col, Card } from 'react-bootstrap';
+import { Row, Col, Card, Button } from 'react-bootstrap';
 import DataTable from 'react-data-table-component';
+
+import AddModal from '../components/categories/AddModal';
+import { useSelector } from 'react-redux';
 
 const columns = [
     {
@@ -18,7 +21,7 @@ const columns = [
     },
 ];
 
-const data = [
+const tableData = [
     {
         id: 1,
         title: 'Beetlejuice',
@@ -32,20 +35,33 @@ const data = [
 ]
 
 const Categories = () => {
+    const data = useSelector((params) => params.categorySlice);
+    const [modalState, setModalState] = useState(false);
+
+    function changeModalState(params) {
+        setModalState(params);
+    }
+
     return (
         <section className='section'>
+            <div className='mb-3'>
+                <Button variant='success' onClick={() => changeModalState(true)}>
+                    Add
+                </Button>
+            </div>
             <Row>
                 <Col lg={12}>
                     <Card>
                         <Card.Body>
                             <DataTable
                                 columns={columns}
-                                data={data}
+                                data={tableData}
                             />
                         </Card.Body>
                     </Card>
                 </Col>
             </Row>
+            <AddModal show={modalState} changeModalState={changeModalState} />
         </section>
     )
 }
