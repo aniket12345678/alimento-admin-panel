@@ -1,7 +1,13 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Button } from 'react-bootstrap'
+import { Link, useNavigate } from 'react-router-dom'
 
 const Header = () => {
+    const navigate = useNavigate()
+    const handleLogout = () => {
+        window.localStorage.clear();
+        navigate('/');
+    }
     return (
         <header id="header" className="header fixed-top d-flex align-items-center">
             <div className="d-flex align-items-center justify-content-between">
@@ -193,8 +199,8 @@ const Header = () => {
                     </li>{/* End Profile Nav */}
                 </ul>
             </nav>{/* End Icons Navigation */}
+            <Button onClick={handleLogout}>logout</Button>
         </header>
-
     )
 }
 

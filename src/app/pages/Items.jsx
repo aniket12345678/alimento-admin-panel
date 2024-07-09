@@ -1,48 +1,84 @@
-import React, { useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 // import PropTypes from 'prop-types'
 import { Col, Row, Card, Button } from 'react-bootstrap';
 import DataTable from 'react-data-table-component';
 
 import AddModal from '../components/items/AddModal';
-import { useSelector } from 'react-redux';
-
-const columns = [
-    {
-        name: 'id',
-        selector: x => x.id,
-    },
-    {
-        name: 'Title',
-        selector: x => <strong>{x.title}</strong>,
-    },
-    {
-        name: 'Year',
-        selector: row => <strong>{row.year}</strong>,
-    },
-];
-
-const tableData = [
-    {
-        id: 1,
-        title: 'Beetlejuice',
-        year: '1988',
-    },
-    {
-        id: 2,
-        title: 'Ghostbusters',
-        year: '1984',
-    },
-]
+import { useDispatch, useSelector } from 'react-redux';
+import secureLocalStorage from 'react-secure-storage';
+import { itemFindAll } from '../slices/item.slice';
+import { adminAuthCheck } from '../config/AuthCheck';
 
 const Items = () => {
+    const dispatch = useDispatch();
     const data = useSelector((params) => params.categorySlice);
-    console.log('data:- ', data);
-    
+
     const [modalState, setModalState] = useState(false);
+    const [itemData, setItemData] = useState([]);
+
+    const adminCheck = adminAuthCheck.getAuthUser();
+
+    const allItems = useCallback(() => {
+        dispatch(itemFindAll({
+            user_id: JSON.parse(secureLocalStorage.getItem('loginStatus')).id
+        }))
+            .unwrap()
+            .then((response) => {
+                // console.log('response:- ', response);
+                setItemData(response.data);
+            }).catch((err) => {
+                console.log('err:- ', err);
+            })
+    }, [dispatch]);
+
+    useEffect(() => {
+        if (secureLocalStorage.getItem('loginStatus')) {
+            allItems();
+        }
+    }, [adminCheck.id, allItems])
+
+
 
     function changeModalState(params) {
         setModalState(params);
     }
+
+    function updateRecord(data) {
+        alert('update function');
+        console.log('updateRecord:- ', data);
+    }
+
+    function deleteRecord(data) {
+        alert('delete function');
+        console.log('deleteRecord:- ', data);
+    }
+
+    const columns = [
+        {
+            name: 'id',
+            selector: x => x.id,
+        },
+        {
+            name: 'Item',
+            selector: x => <strong>{x.item}</strong>,
+        },
+        {
+            name: 'Image',
+            selector: x => <img width={38} src={`http://localhost:5000/api/items/img/${x.id}`} alt="" />,
+        },
+        {
+            name: 'Action',
+            selector: x => <div className='d-flex justify-content-between'>
+                <div>
+                    <Button variant='primary' onClick={() => updateRecord(x.id)}>Update</Button>
+                </div>
+                <div>
+                    <Button variant='danger' onClick={() => deleteRecord(x.id)}>Delete</Button>
+                </div>
+            </div>,
+        },
+    ];
+
     return (
         <section className='section'>
             <div className='mb-3'>
@@ -56,13 +92,13 @@ const Items = () => {
                         <Card.Body>
                             <DataTable
                                 columns={columns}
-                                data={tableData}
+                                data={itemData}
                             />
                         </Card.Body>
                     </Card>
                 </Col>
             </Row>
-            <AddModal show={modalState} changeModalState={changeModalState} />
+            <AddModal show={modalState} changeModalState={changeModalState} allItems={allItems} />
 
         </section>
     )

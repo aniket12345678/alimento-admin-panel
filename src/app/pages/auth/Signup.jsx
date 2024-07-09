@@ -1,15 +1,30 @@
 import { useFormik } from 'formik'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Form } from 'react-bootstrap'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import * as yup from 'yup'
 import { authSignup } from '../../slices/auth.slice'
 import { useDispatch } from 'react-redux'
+import { adminAuthCheck } from '../../config/AuthCheck'
 
 const Signup = () => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
+
+    // useEffect(() => {
+    //     if (adminAuthCheck.getAuthUser()) {
+    //         navigate('/dahsboard')
+    //     }
+    // }, [adminAuthCheck.getAuthUser()])
+
+    const [signupMessage, setSignupMessage] = useState({
+        color: '',
+        message: ''
+    });
+
     const validateFields = yup.object().shape({
-        name: yup.string().required('Enter name'),
+        first_name: yup.string().required('Enter name'),
+        last_name: yup.string().required('Enter name'),
         email: yup.string()
             .email('Enter a valid email')
             .required('Enter email'),
@@ -34,7 +49,8 @@ const Signup = () => {
         handleSubmit
     } = useFormik({
         initialValues: {
-            name: '',
+            first_name: '',
+            last_name: '',
             email: '',
             password: '',
             confirm_password: '',
@@ -42,12 +58,18 @@ const Signup = () => {
         },
         validationSchema: validateFields,
         onSubmit: (values) => {
-            console.log('values:- ', values);
             values.user_role = 1;
-            dispatch(authSignup(values)).unwrap().then(() => {
-                
-            }).catch(() => {
-                
+            dispatch(authSignup(values)).unwrap().then((response) => {
+                if (response.code === 200) {
+                    setSignupMessage({ color: 'text-success', message: response.message });
+                    setTimeout(() => {
+                        navigate('/');
+                    }, 2000);
+                } else {
+                    setSignupMessage({ color: 'text-danger', message: response.message });
+                }
+            }).catch((err) => {
+                console.log('authSignup err:- ', err);
             })
         }
     });
@@ -71,18 +93,33 @@ const Signup = () => {
                                             <h5 className="card-title text-center pb-0 fs-4">Sign up</h5>
                                         </div>
                                         <Form className="row g-3" onSubmit={handleSubmit}>
-                                            <div className="col-12">
+                                            <div className="col-6">
                                                 <input
                                                     type="text"
-                                                    name="name"
+                                                    name="first_name"
                                                     className="form-control"
-                                                    placeholder='Name'
-                                                    value={values.name}
+                                                    placeholder='First name'
+                                                    value={values.first_name}
                                                     onChange={handleChange}
                                                 />
-                                                {errors.name &&
+                                                {errors.first_name &&
                                                     <div className="formik-error">
-                                                        {errors.name}
+                                                        {errors.first_name}
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div className="col-6">
+                                                <input
+                                                    type="text"
+                                                    name="last_name"
+                                                    className="form-control"
+                                                    placeholder='Last name'
+                                                    value={values.last_name}
+                                                    onChange={handleChange}
+                                                />
+                                                {errors.last_name &&
+                                                    <div className="formik-error">
+                                                        {errors.last_name}
                                                     </div>
                                                 }
                                             </div>
@@ -151,6 +188,11 @@ const Signup = () => {
                                                         </div>
                                                     }
                                                 </div>
+                                            </div>
+                                            <div className={`text-center ${signupMessage.color}`}>
+                                                <strong>
+                                                    {signupMessage.message}
+                                                </strong>
                                             </div>
                                             <div className="col-12 text-center">
                                                 <button className="btn btn-primary" type="submit">

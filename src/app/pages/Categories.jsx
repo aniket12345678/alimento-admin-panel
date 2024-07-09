@@ -1,46 +1,71 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import PropTypes from 'prop-types'
 import { Row, Col, Card, Button } from 'react-bootstrap';
 import DataTable from 'react-data-table-component';
 
 import AddModal from '../components/categories/AddModal';
-import { useSelector } from 'react-redux';
-
-const columns = [
-    {
-        name: 'id',
-        selector: x => x.id,
-    },
-    {
-        name: 'Title',
-        selector: x => <strong>{x.title}</strong>,
-    },
-    {
-        name: 'Year',
-        selector: row => <strong>{row.year}</strong>,
-    },
-];
-
-const tableData = [
-    {
-        id: 1,
-        title: 'Beetlejuice',
-        year: '1988',
-    },
-    {
-        id: 2,
-        title: 'Ghostbusters',
-        year: '1984',
-    },
-]
+import { useDispatch, useSelector } from 'react-redux';
+import { categoryFindAll } from '../slices/category.slice';
+import secureLocalStorage from 'react-secure-storage';
 
 const Categories = () => {
     const data = useSelector((params) => params.categorySlice);
+    const dispatch = useDispatch();
     const [modalState, setModalState] = useState(false);
+    const [categoryData, setCategoryData] = useState([]);
+
+    useEffect(() => {
+        if (secureLocalStorage.getItem('loginStatus')) {
+            allCategories();
+        }
+    }, []);
+
+    function allCategories() {
+        dispatch(categoryFindAll())
+            .unwrap()
+            .then((response) => {
+                console.log('categoryFindAll:- ', response);
+                setCategoryData(response.data);
+            }).catch((err) => {
+                console.log('err:- ', err);
+            })
+    }
 
     function changeModalState(params) {
         setModalState(params);
     }
+
+    function updateRecord(data) {
+        alert('update function');
+        console.log('updateRecord:- ', data);
+    }
+
+    function deleteRecord(data) {
+        alert('delete function');
+        console.log('deleteRecord:- ', data);
+    }
+
+    const columns = [
+        {
+            name: 'Category',
+            selector: x => <strong>{x.category}</strong>,
+        },
+        {
+            name: 'Image',
+            selector: x => <img width={38} src={`http://localhost:5000/api/categories/img/${x.id}`} alt="" />,
+        },
+        {
+            name: 'Action',
+            selector: x => <div className='d-flex justify-content-between'>
+                <div>
+                    <Button variant='primary' onClick={() => updateRecord(x.id)}>Update</Button>
+                </div>
+                <div>
+                    <Button variant='danger' onClick={() => deleteRecord(x.id)}>Delete</Button>
+                </div>
+            </div>,
+        },
+    ];
 
     return (
         <section className='section'>
@@ -55,7 +80,7 @@ const Categories = () => {
                         <Card.Body>
                             <DataTable
                                 columns={columns}
-                                data={tableData}
+                                data={categoryData}
                             />
                         </Card.Body>
                     </Card>

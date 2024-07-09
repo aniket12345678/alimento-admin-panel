@@ -1,9 +1,28 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import * as yup from 'yup'
 import { useFormik } from 'formik';
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux';
+import secureLocalStorage from "react-secure-storage";
+
+import { authSignin } from '../../slices/auth.slice';
+import { adminAuthCheck } from '../../config/AuthCheck';
 
 const Signin = () => {
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const adminCheck = adminAuthCheck.getAuthUser();
+
+    useEffect(() => {
+        if (adminCheck) {
+            window.location.href = '/dahsboard'
+        }
+    }, [adminCheck]);
+
+    const [signinMessage, setSigninMessage] = useState({
+        color: '',
+        message: ''
+    });
 
     const validateFields = yup.object().shape({
         email: yup.string()
@@ -31,7 +50,25 @@ const Signin = () => {
         },
         validationSchema: validateFields,
         onSubmit: (values) => {
-            console.log('values:- ', values);
+            values.user_role=1;
+            dispatch(authSignin(values)).unwrap().then((response) => {
+                setSigninMessage({
+                    color: [200, 600].includes(response.code) ? 'text-success' : 'text-danger',
+                    message: response.message
+                });
+                if (response.code === 200) {
+                    setTimeout(() => {
+                        secureLocalStorage.setItem('loginStatus', JSON.stringify({
+                            id: response.user_id,
+                            is_logged_in: true
+                        }));
+                        secureLocalStorage.setItem('authToken', response.auth_token);
+                        navigate('/dashboard');
+                    }, 2000);
+                }
+            }).catch((err) => {
+                console.log('err:- ', err);
+            })
         }
     });
 
@@ -83,6 +120,11 @@ const Signin = () => {
                                                         {errors.password}
                                                     </div>
                                                 }
+                                            </div>
+                                            <div className={`text-center ${signinMessage.color}`}>
+                                                <strong>
+                                                    {signinMessage.message}
+                                                </strong>
                                             </div>
                                             <div className="col-12 text-center">
                                                 <button className="btn btn-primary" type="submit">

@@ -4,9 +4,10 @@ import { API } from "../middleware/api";
 export const categoryAdd = createAsyncThunk('/categories/add',
     async (values) => {
         try {
-            const response = await API.post('/categories/add', values)
+            const response = await API.post('/categories/add', values);
+            return response.data;
         } catch (error) {
-
+            console.log('error:- ', error);
         }
     }
 );
@@ -14,7 +15,8 @@ export const categoryAdd = createAsyncThunk('/categories/add',
 export const categoryFindAll = createAsyncThunk('/categories/find/all',
     async (values) => {
         try {
-            const response = await API.post('/categories/find/all', values)
+            const response = await API.get('/categories/find/all')
+            return response.data;
         } catch (error) {
 
         }
@@ -35,12 +37,12 @@ export const categorySlice = createSlice({
     name: 'categorySlice',
     initialState: {},
     reducers: {},
-    extraReducers: () => {
-        categoryFindAll.fulfilled = (state, action) => {
-            console.log('categoryFindAll.fulfilled:- ', state);
-        }
-        categoryFindOne.fulfilled = (state, action) => {
-            console.log('categoryFindOne.fulfilled:- ', state);
-        }
+    extraReducers: (builder) => {
+        builder.addCase(categoryFindAll.fulfilled, (state, action) => {
+            console.log('categoryFindAll.fulfilled', action);
+        });
+        builder.addCase(categoryFindOne.fulfilled, (state, action) => {
+            console.log('categoryFindOne.fulfilled', action);
+        });
     }
 });

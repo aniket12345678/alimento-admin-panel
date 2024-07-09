@@ -1,10 +1,10 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { API } from "../middleware/api";
 
-export const itemAdd = createAsyncThunk('/items/add',
+export const userAdd = createAsyncThunk('/users/add',
     async (values) => {
         try {
-            const response = await API.post('/items/add', values);
+            const response = await API.post('/users/add', values);
             console.log('itemAdd', response);
             return response.data
         } catch (error) {
@@ -13,11 +13,11 @@ export const itemAdd = createAsyncThunk('/items/add',
     }
 );
 
-export const itemFindAll = createAsyncThunk('/items/find/all',
+export const userFindAll = createAsyncThunk('/users/find/all',
     async (values) => {
         try {
-            const response = await API.post('/items/find/all', values);
-            console.log('itemFindAll:- ', response);
+            const response = await API.get('/users/find/all');
+            console.log('userFindAll:- ', response);
             return response.data
         } catch (error) {
             console.log('error itemFindAll:- ', error);
@@ -25,10 +25,10 @@ export const itemFindAll = createAsyncThunk('/items/find/all',
     }
 );
 
-export const itemFindOne = createAsyncThunk('/items/delete',
+export const userFindOne = createAsyncThunk('/users/find/one',
     async (values) => {
         try {
-            const response = await API.post('/items/delete', values);
+            const response = await API.post('/users/find/one', values);
             console.log('itemFindOne:- ', response);
         } catch (error) {
             console.log('error itemFindOne:- ', error);
@@ -40,16 +40,17 @@ const initialValues = {
     findAll: []
 }
 
-export const itemSlice = createSlice({
-    name: 'itemSlice',
+export const userSlice = createSlice({
+    name: 'userSlice',
     initialState: initialValues,
     reducers: {},
     extraReducers: (builder) => {
-        builder.addCase(itemFindAll.fulfilled, (state, action) => {
-            console.log('itemFindAll.fulfilled', action);
+        builder.addCase(userFindAll.fulfilled, (state, action) => {
+            console.log('userFindAll.fulfilled', action);
+            // state.findAll = action
         });
-        builder.addCase(itemFindOne.fulfilled, (state, action) => {
-            console.log('itemFindOne.fulfilled', action);
+        builder.addCase(userFindOne.fulfilled, (state, action) => {
+            console.log('userFindOne.fulfilled', action);
         });
     }
 });
