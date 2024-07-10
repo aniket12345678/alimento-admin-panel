@@ -13,11 +13,11 @@ const Signin = () => {
     const navigate = useNavigate();
     const adminCheck = adminAuthCheck.getAuthUser();
 
-    useEffect(() => {
-        if (adminCheck) {
-            window.location.href = '/dahsboard'
-        }
-    }, [adminCheck]);
+    // useEffect(() => {
+    //     if (adminCheck) {
+    //         window.location.href = '/dahsboard'
+    //     }
+    // }, [adminCheck]);
 
     const [signinMessage, setSigninMessage] = useState({
         color: '',

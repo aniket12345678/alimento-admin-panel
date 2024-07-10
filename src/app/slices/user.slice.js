@@ -1,11 +1,13 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { API } from "../middleware/api";
+import { fetchAuthToken, toastMessage } from "../common/functionHooks";
+
+const authToken = fetchAuthToken();
 
 export const userAdd = createAsyncThunk('/users/add',
     async (values) => {
         try {
-            const response = await API.post('/users/add', values);
-            console.log('itemAdd', response);
+            const response = await API.post('/users/add', values, authToken);
             return response.data
         } catch (error) {
             console.log('error itemAdd:- ', error);
@@ -14,24 +16,15 @@ export const userAdd = createAsyncThunk('/users/add',
 );
 
 export const userFindAll = createAsyncThunk('/users/find/all',
-    async (values) => {
+    async () => {
         try {
-            const response = await API.get('/users/find/all');
-            console.log('userFindAll:- ', response);
+            const response = await API.get('/users/find/all', authToken);
             return response.data
         } catch (error) {
-            console.log('error itemFindAll:- ', error);
-        }
-    }
-);
-
-export const userFindOne = createAsyncThunk('/users/find/one',
-    async (values) => {
-        try {
-            const response = await API.post('/users/find/one', values);
-            console.log('itemFindOne:- ', response);
-        } catch (error) {
-            console.log('error itemFindOne:- ', error);
+            console.log('userFindAll -> slice -> error');
+            toastMessage('error', 'We are facing some technical issue');
+            const errorObj = { ...error }
+            throw errorObj;
         }
     }
 );
@@ -46,11 +39,7 @@ export const userSlice = createSlice({
     reducers: {},
     extraReducers: (builder) => {
         builder.addCase(userFindAll.fulfilled, (state, action) => {
-            console.log('userFindAll.fulfilled', action);
-            // state.findAll = action
-        });
-        builder.addCase(userFindOne.fulfilled, (state, action) => {
-            console.log('userFindOne.fulfilled', action);
+            state.findAll = action.payload.data;
         });
     }
 });

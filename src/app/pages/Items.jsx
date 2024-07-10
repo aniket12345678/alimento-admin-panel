@@ -1,43 +1,26 @@
-import React, { useCallback, useEffect, useState } from 'react'
-// import PropTypes from 'prop-types'
+import React, { useEffect, useState } from 'react'
 import { Col, Row, Card, Button } from 'react-bootstrap';
 import DataTable from 'react-data-table-component';
 
 import AddModal from '../components/items/AddModal';
 import { useDispatch, useSelector } from 'react-redux';
 import secureLocalStorage from 'react-secure-storage';
-import { itemFindAll } from '../slices/item.slice';
-import { adminAuthCheck } from '../config/AuthCheck';
+import { itemDelete, itemFindAll } from '../slices/item.slice';
 
 const Items = () => {
     const dispatch = useDispatch();
-    const data = useSelector((params) => params.categorySlice);
-
+    const { findAll } = useSelector((params) => params.itemSlice);
     const [modalState, setModalState] = useState(false);
-    const [itemData, setItemData] = useState([]);
-
-    const adminCheck = adminAuthCheck.getAuthUser();
-
-    const allItems = useCallback(() => {
-        dispatch(itemFindAll({
-            user_id: JSON.parse(secureLocalStorage.getItem('loginStatus')).id
-        }))
-            .unwrap()
-            .then((response) => {
-                // console.log('response:- ', response);
-                setItemData(response.data);
-            }).catch((err) => {
-                console.log('err:- ', err);
-            })
-    }, [dispatch]);
 
     useEffect(() => {
         if (secureLocalStorage.getItem('loginStatus')) {
             allItems();
         }
-    }, [adminCheck.id, allItems])
+    }, []);
 
-
+    const allItems = () => {
+        dispatch(itemFindAll({}))
+    };
 
     function changeModalState(params) {
         setModalState(params);
@@ -49,8 +32,13 @@ const Items = () => {
     }
 
     function deleteRecord(data) {
-        alert('delete function');
-        console.log('deleteRecord:- ', data);
+        if (window.confirm('Do you want to delete this data?')) {
+            dispatch(itemDelete({ id: data })).unwrap().then((result) => {
+                allItems();
+            }).catch((err) => {
+                console.log('err:- ', err);
+            });
+        }
     }
 
     const columns = [
@@ -92,14 +80,13 @@ const Items = () => {
                         <Card.Body>
                             <DataTable
                                 columns={columns}
-                                data={itemData}
+                                data={findAll}
                             />
                         </Card.Body>
                     </Card>
                 </Col>
             </Row>
             <AddModal show={modalState} changeModalState={changeModalState} allItems={allItems} />
-
         </section>
     )
 }

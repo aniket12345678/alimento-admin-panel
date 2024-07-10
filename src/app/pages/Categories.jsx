@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from 'react'
-import PropTypes from 'prop-types'
 import { Row, Col, Card, Button } from 'react-bootstrap';
 import DataTable from 'react-data-table-component';
 
 import AddModal from '../components/categories/AddModal';
 import { useDispatch, useSelector } from 'react-redux';
-import { categoryFindAll } from '../slices/category.slice';
+import {
+    categoryDelete, categoryFindAll,
+    categoryFindOne, categoryResetFindOne
+} from '../slices/category.slice';
 import secureLocalStorage from 'react-secure-storage';
+import UpdateModal from '../components/categories/UpdateModal';
 
 const Categories = () => {
-    const data = useSelector((params) => params.categorySlice);
     const dispatch = useDispatch();
+    const { findAll, findOne } = useSelector((params) => params.categorySlice);
     const [modalState, setModalState] = useState(false);
-    const [categoryData, setCategoryData] = useState([]);
+    const [updateModalState, setUpdateModalState] = useState(false);
+
+    console.log('findOne:- ', findOne);
 
     useEffect(() => {
         if (secureLocalStorage.getItem('loginStatus')) {
@@ -22,13 +27,6 @@ const Categories = () => {
 
     function allCategories() {
         dispatch(categoryFindAll())
-            .unwrap()
-            .then((response) => {
-                console.log('categoryFindAll:- ', response);
-                setCategoryData(response.data);
-            }).catch((err) => {
-                console.log('err:- ', err);
-            })
     }
 
     function changeModalState(params) {
@@ -36,13 +34,23 @@ const Categories = () => {
     }
 
     function updateRecord(data) {
-        alert('update function');
-        console.log('updateRecord:- ', data);
+        setUpdateModalState(true);
+        dispatch(categoryFindOne({ id: data })).unwrap().then((result) => {
+            console.log('result:- ', result);
+            // dispatch(categoryResetFindOne())
+        }).catch((err) => {
+            console.log('err:- ', err);
+        });
     }
 
     function deleteRecord(data) {
-        alert('delete function');
-        console.log('deleteRecord:- ', data);
+        if (window.confirm('Do you want to delete this data?')) {
+            dispatch(categoryDelete({ id: data })).unwrap().then((response) => {
+                allCategories();
+            }).catch((err) => {
+                console.log('err:- ', err);
+            });
+        }
     }
 
     const columns = [
@@ -52,13 +60,13 @@ const Categories = () => {
         },
         {
             name: 'Image',
-            selector: x => <img width={38} src={`http://localhost:5000/api/categories/img/${x.id}`} alt="" />,
+            selector: x => <img width={38} src={`${process.env.REACT_APP_BASE_URL}/categories/img/${x._id}`} alt="" />,
         },
         {
             name: 'Action',
             selector: x => <div className='d-flex justify-content-between'>
                 <div>
-                    <Button variant='primary' onClick={() => updateRecord(x.id)}>Update</Button>
+                    <Button variant='primary' onClick={() => updateRecord(x._id)}>Update</Button>
                 </div>
                 <div>
                     <Button variant='danger' onClick={() => deleteRecord(x.id)}>Delete</Button>
@@ -80,13 +88,14 @@ const Categories = () => {
                         <Card.Body>
                             <DataTable
                                 columns={columns}
-                                data={categoryData}
+                                data={findAll}
                             />
                         </Card.Body>
                     </Card>
                 </Col>
             </Row>
             <AddModal show={modalState} changeModalState={changeModalState} />
+            <UpdateModal show={updateModalState} changeModalState={setUpdateModalState} data={findOne} />
         </section>
     )
 }
