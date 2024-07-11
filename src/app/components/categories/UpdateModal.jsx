@@ -2,14 +2,12 @@ import React, { useState } from 'react'
 import { useFormik } from 'formik';
 import { Button, Form, Modal } from 'react-bootstrap'
 import * as yup from 'yup'
-import { adminAuthCheck } from '../../config/AuthCheck';
-import { categoryAdd } from '../../slices/category.slice';
+import { categoryUpdate } from '../../slices/category.slice';
 import { useDispatch } from 'react-redux';
 
 const UpdateModal = (props) => {
-    const { show, changeModalState, data } = props;
-    console.log('data:- ', data);
     const dispatch = useDispatch();
+    const { show, changeModalState, data, allCategories } = props;
 
     const [previewImg, setPreviewImg] = useState(null);
     const [storeImg, setStoreImg] = useState('');
@@ -23,27 +21,22 @@ const UpdateModal = (props) => {
         validationSchema: validateFields,
         enableReinitialize: true,
         onSubmit: (values) => {
-            console.log('values:- ', values);
-            const { id } = adminAuthCheck.getAuthUser();
-            values.user_id = id;
             const formdata = new FormData();
             formdata.append('attachments', storeImg);
             formdata.append('data', JSON.stringify(values));
-            dispatch(categoryAdd(formdata)).unwrap().then((response) => {
-                // if (response.code === 200) {
-                //     resetForm();
-                //     setStoreImg('');
-                //     setPreviewImg(null);
-                //     changeModalState(false)
-                // }
-                // console.log('response:- ', response);
+            dispatch(categoryUpdate(formdata)).unwrap().then((response) => {
+                if (response.code === 200) {
+                    allCategories();
+                    resetForm();
+                    setStoreImg('');
+                    setPreviewImg(null);
+                    changeModalState(false)
+                }
             }).catch((err) => {
                 console.log(err);
             })
         }
     });
-
-    console.log('values:- ', values);
 
     const handleFiles = (data) => {
         setStoreImg(data);

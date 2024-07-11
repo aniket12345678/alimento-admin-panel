@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { Col, Row, Card, Button } from 'react-bootstrap';
 import DataTable from 'react-data-table-component';
-
-import AddModal from '../components/items/AddModal';
 import { useDispatch, useSelector } from 'react-redux';
 import secureLocalStorage from 'react-secure-storage';
-import { itemDelete, itemFindAll } from '../slices/item.slice';
+
+import AddModal from '../components/items/AddModal';
+import UpdateModal from '../components/items/UpdateModal';
+import { itemDelete, itemFindAll, itemFindOne } from '../slices/item.slice';
 
 const Items = () => {
     const dispatch = useDispatch();
-    const { findAll } = useSelector((params) => params.itemSlice);
+    const { findAll, findOne } = useSelector((params) => params.itemSlice);
     const [modalState, setModalState] = useState(false);
+    const [updateModalState, setUpdateModalState] = useState(false);
 
     useEffect(() => {
         if (secureLocalStorage.getItem('loginStatus')) {
@@ -27,8 +29,8 @@ const Items = () => {
     }
 
     function updateRecord(data) {
-        alert('update function');
-        console.log('updateRecord:- ', data);
+        setUpdateModalState(true);
+        dispatch(itemFindOne({ id: data }))
     }
 
     function deleteRecord(data) {
@@ -47,12 +49,20 @@ const Items = () => {
             selector: x => x.id,
         },
         {
+            name: 'Category',
+            selector: x => <strong>{x.category_id['category']}</strong>,
+        },
+        {
             name: 'Item',
             selector: x => <strong>{x.item}</strong>,
         },
         {
             name: 'Image',
-            selector: x => <img width={38} src={`http://localhost:5000/api/items/img/${x.id}`} alt="" />,
+            selector: x => <img
+                width={38}
+                src={`${process.env.REACT_APP_BASE_URL}/items/img/${x['_id']}`}
+                alt=""
+            />,
         },
         {
             name: 'Action',
@@ -87,6 +97,12 @@ const Items = () => {
                 </Col>
             </Row>
             <AddModal show={modalState} changeModalState={changeModalState} allItems={allItems} />
+            <UpdateModal
+                data={findOne}
+                allItems={allItems}
+                show={updateModalState}
+                changeModalState={setUpdateModalState}
+            />
         </section>
     )
 }

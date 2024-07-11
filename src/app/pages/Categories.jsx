@@ -17,8 +17,6 @@ const Categories = () => {
     const [modalState, setModalState] = useState(false);
     const [updateModalState, setUpdateModalState] = useState(false);
 
-    console.log('findOne:- ', findOne);
-
     useEffect(() => {
         if (secureLocalStorage.getItem('loginStatus')) {
             allCategories();
@@ -35,12 +33,7 @@ const Categories = () => {
 
     function updateRecord(data) {
         setUpdateModalState(true);
-        dispatch(categoryFindOne({ id: data })).unwrap().then((result) => {
-            console.log('result:- ', result);
-            // dispatch(categoryResetFindOne())
-        }).catch((err) => {
-            console.log('err:- ', err);
-        });
+        dispatch(categoryFindOne({ id: data }))
     }
 
     function deleteRecord(data) {
@@ -60,7 +53,7 @@ const Categories = () => {
         },
         {
             name: 'Image',
-            selector: x => <img width={38} src={`${process.env.REACT_APP_BASE_URL}/categories/img/${x._id}`} alt="" />,
+            selector: x => <img width={38} src={`${process.env.REACT_APP_BASE_URL}/categories/img/${x['_id']}`} alt="" />,
         },
         {
             name: 'Action',
@@ -95,7 +88,12 @@ const Categories = () => {
                 </Col>
             </Row>
             <AddModal show={modalState} changeModalState={changeModalState} />
-            <UpdateModal show={updateModalState} changeModalState={setUpdateModalState} data={findOne} />
+            <UpdateModal
+                data={findOne}
+                show={updateModalState}
+                allCategories={allCategories}
+                changeModalState={setUpdateModalState}
+            />
         </section>
     )
 }

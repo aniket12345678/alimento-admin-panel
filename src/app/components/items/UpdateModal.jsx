@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react'
-import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
-import secureLocalStorage from 'react-secure-storage';
-import { useDispatch } from 'react-redux';
-import { useFormik } from 'formik';
 import * as yup from 'yup'
+import { useFormik } from 'formik';
+import { useDispatch } from 'react-redux';
+import secureLocalStorage from 'react-secure-storage';
+import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 
 import { categoryFindAll } from '../../slices/category.slice';
-import { itemAdd } from '../../slices/item.slice';
-import { adminAuthCheck } from '../../config/AuthCheck';
+import { itemUpdate } from '../../slices/item.slice';
 
-const AddModal = (props) => {
-    const { show, changeModalState, allItems } = props;
+const UpdateModal = (props) => {
     const dispatch = useDispatch();
+    const { show, changeModalState, data, allItems } = props;
 
     const [categoryData, setCategoryData] = useState([]);
     const [previewImg, setPreviewImg] = useState(null);
@@ -30,37 +29,33 @@ const AddModal = (props) => {
 
     const { values, errors, handleChange, handleSubmit, resetForm } = useFormik({
         initialValues: {
-            item: '',
-            category_id: ''
+            item: data.item,
+            category_id: data.category_id['_id'],
+            '_id': data['_id'],
         },
         validationSchema: validateFields,
+        enableReinitialize: true,
         onSubmit: (values) => {
-            const { id } = adminAuthCheck.getAuthUser();
-            values.user_id = id;
+            console.log('values:- ', values);
             const formdata = new FormData();
             formdata.append('attachments', storeImg);
             formdata.append('data', JSON.stringify(values));
-            dispatch(itemAdd(formdata)).unwrap().then((response) => {
+            dispatch(itemUpdate(formdata)).unwrap().then((response) => {
                 if (response.code === 200) {
-                    allItems()
+                    allItems();
                     resetForm();
                     setStoreImg('');
                     setPreviewImg(null);
                     changeModalState(false)
                 }
-                console.log('response:- ', response);
             }).catch((err) => {
                 console.log(err);
             })
         }
     });
 
-
-
     function allCategories() {
-        dispatch(categoryFindAll({
-            user_id: JSON.parse(secureLocalStorage.getItem('loginStatus')).id
-        }))
+        dispatch(categoryFindAll())
             .unwrap()
             .then((response) => {
                 setCategoryData(response.data);
@@ -86,7 +81,7 @@ const AddModal = (props) => {
             onHide={() => changeModalState(false)}
         >
             <Modal.Header closeButton>
-                <Modal.Title>Add Item</Modal.Title>
+                <Modal.Title>Update Item</Modal.Title>
             </Modal.Header>
             <Form onSubmit={handleSubmit}>
                 <Modal.Body>
@@ -141,8 +136,14 @@ const AddModal = (props) => {
                         />
                     </Form.Group>
                     {
-                        previewImg &&
-                        <img src={previewImg} alt="" style={{ width: '140px', height: '160px' }} />
+                        previewImg ?
+                            <img src={previewImg} alt="" style={{ width: '140px', height: '160px' }} />
+                            :
+                            <img
+                                src={`${process.env.REACT_APP_BASE_URL}/items/img/${values['_id']}`}
+                                alt=""
+                                style={{ width: '140px', height: '160px' }}
+                            />
                     }
                 </Modal.Body>
                 <Modal.Footer>
@@ -155,4 +156,4 @@ const AddModal = (props) => {
     )
 }
 
-export default AddModal
+export default UpdateModal

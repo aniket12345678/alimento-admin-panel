@@ -7,11 +7,27 @@ const authToken = fetchAuthToken();
 export const itemAdd = createAsyncThunk('/items/add',
     async (values) => {
         try {
-            const response = await API.post('/items/add', values);
-            console.log('itemAdd', response);
+            const response = await API.post('/items/add', values, authToken);
             return response.data
         } catch (error) {
             console.log('error itemAdd:- ', error);
+        }
+    }
+);
+
+export const itemUpdate = createAsyncThunk('/items/update',
+    async (values) => {
+        try {
+            const response = await API.post('/items/update', values, authToken);
+            if (response.data.code === 200) {
+                toastMessage('success', response.data.message);
+            }
+            return response.data
+        } catch (error) {
+            console.log('categoryUpdate -> slice -> error');
+            toastMessage('error', 'We are facing some technical issue');
+            const errorObj = { ...error }
+            throw errorObj;
         }
     }
 );
@@ -62,7 +78,13 @@ export const itemDelete = createAsyncThunk('/items/delete',
 );
 
 const initialValues = {
-    findAll: []
+    findAll: [],
+    findOne: {
+        _id: '',
+        item: '',
+        item_img: '',
+        category_id: {}
+    }
 }
 
 export const itemSlice = createSlice({
@@ -74,7 +96,7 @@ export const itemSlice = createSlice({
             state.findAll = action.payload.data;
         });
         builder.addCase(itemFindOne.fulfilled, (state, action) => {
-            console.log('itemFindOne.fulfilled', action);
+            state.findOne = action.payload.data;
         });
     }
 });
