@@ -13,4 +13,6 @@ function toastMessage(type, message) {
     toast[type](message)
 }
 
+
+
 export { fetchAuthToken, toastMessage }

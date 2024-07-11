@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { API } from "../middleware/api";
-import { fetchAuthToken, toastMessage } from "../common/functionHooks";
+import { fetchAuthToken, toastMessage } from "../common/functions/functions";
 
 const authToken = fetchAuthToken();
 
