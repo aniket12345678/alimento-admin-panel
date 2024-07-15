@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import * as yup from 'yup'
 import { useFormik } from 'formik';
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux';
 import secureLocalStorage from "react-secure-storage";
 
@@ -12,12 +12,6 @@ const Signin = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const adminCheck = adminAuthCheck.getAuthUser();
-
-    // useEffect(() => {
-    //     if (adminCheck) {
-    //         window.location.href = '/dahsboard'
-    //     }
-    // }, [adminCheck]);
 
     const [signinMessage, setSigninMessage] = useState({
         color: '',
@@ -50,7 +44,7 @@ const Signin = () => {
         },
         validationSchema: validateFields,
         onSubmit: (values) => {
-            values.user_role=1;
+            values.user_role = 1;
             dispatch(authSignin(values)).unwrap().then((response) => {
                 setSigninMessage({
                     color: [200, 600].includes(response.code) ? 'text-success' : 'text-danger',
@@ -71,6 +65,13 @@ const Signin = () => {
             })
         }
     });
+
+    const isLoggedIn = secureLocalStorage.getItem('loginStatus') &&
+        JSON.parse(secureLocalStorage.getItem('loginStatus')).is_logged_in;
+
+    if (isLoggedIn) {
+        return <Navigate to={'/dashboard'} />
+    }
 
     return (
         <main>

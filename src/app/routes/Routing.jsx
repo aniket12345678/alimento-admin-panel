@@ -1,5 +1,5 @@
 import React from 'react'
-import { BrowserRouter, Route, Routes, } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, } from 'react-router-dom';
 
 import Signin from '../pages/auth/Signin';
 import Signup from '../pages/auth/Signup';
@@ -12,6 +12,7 @@ import Items from '../pages/Items';
 import Categories from '../pages/Categories';
 import Users from '../pages/Users';
 import PageNotFound from '../pages/PageNotFound';
+import ProtectedRoutes from './ProtectedRoutes';
 
 const Routing = () => {
     return (
@@ -19,12 +20,14 @@ const Routing = () => {
             <Routes>
                 <Route path='/' element={<Signin />} />
                 <Route path='/signup' element={<Signup />} />
-                <Route path='/dashboard' element={<Layout Page={Dashboard} />} />
-                <Route path='/users' element={<Layout Page={Users} />} />
-                <Route path='/categories' element={<Layout Page={Categories} />} />
-                <Route path='/items' element={<Layout Page={Items} />} />
-                <Route path='/orders' element={<Layout Page={Orders} />} />
-                {/* <Route path='*' element={<PageNotFound />} /> */}
+                <Route element={<ProtectedRoutes/>}>
+                    <Route path='/dashboard' element={<Layout Page={Dashboard} />} />
+                    <Route path='/users' element={<Layout Page={Users} />} />
+                    <Route path='/categories' element={<Layout Page={Categories} />} />
+                    <Route path='/items' element={<Layout Page={Items} />} />
+                    <Route path='/orders' element={<Layout Page={Orders} />} />
+                </Route>
+
             </Routes>
         </BrowserRouter>
     )

@@ -1,11 +1,12 @@
 import React from 'react'
 import { Button } from 'react-bootstrap'
 import { Link, useNavigate } from 'react-router-dom'
+import secureLocalStorage from 'react-secure-storage';
 
 const Header = () => {
-    const navigate = useNavigate()
+    const navigate = useNavigate();
     const handleLogout = () => {
-        window.localStorage.clear();
+        secureLocalStorage.clear();
         navigate('/');
     }
     return (
