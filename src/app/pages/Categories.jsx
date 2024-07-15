@@ -53,7 +53,11 @@ const Categories = () => {
         },
         {
             name: 'Image',
-            selector: x => <img width={38} src={`${process.env.REACT_APP_BASE_URL}/categories/img/${x['_id']}`} alt="" />,
+            selector: x => <img
+                width={38}
+                src={`${process.env.REACT_APP_BASE_URL}/categories/img/${x['_id']}`}
+                alt="category-image"
+            />,
         },
         {
             name: 'Action',

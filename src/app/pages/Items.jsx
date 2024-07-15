@@ -61,7 +61,7 @@ const Items = () => {
             selector: x => <img
                 width={38}
                 src={`${process.env.REACT_APP_BASE_URL}/items/img/${x['_id']}`}
-                alt=""
+                alt="item-image"
             />,
         },
         {
