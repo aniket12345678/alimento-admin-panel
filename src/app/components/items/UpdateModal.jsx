@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import * as yup from 'yup'
 import { useFormik } from 'formik';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import secureLocalStorage from 'react-secure-storage';
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 
@@ -12,14 +12,14 @@ const UpdateModal = (props) => {
     const dispatch = useDispatch();
     const { show, changeModalState, data, allItems } = props;
 
-    const [categoryData, setCategoryData] = useState([]);
+    const { findAll } = useSelector((x) => x.categorySlice);
+    const { signin } = useSelector((x) => x.authSlice);
+
     const [previewImg, setPreviewImg] = useState(null);
     const [storeImg, setStoreImg] = useState('');
 
     useEffect(() => {
-        if (secureLocalStorage.getItem('loginStatus')) {
-            allCategories();
-        }
+        allCategories();
     }, []);
 
     const validateFields = yup.object().shape({
@@ -30,38 +30,35 @@ const UpdateModal = (props) => {
     const { values, errors, handleChange, handleSubmit, resetForm } = useFormik({
         initialValues: {
             item: data.item,
-            category_id: data.category_id['_id'],
+            category_id: data.category_id && data.category_id['_id'],
             '_id': data['_id'],
         },
         validationSchema: validateFields,
         enableReinitialize: true,
         onSubmit: (values) => {
-            console.log('values:- ', values);
             const formdata = new FormData();
             formdata.append('attachments', storeImg);
             formdata.append('data', JSON.stringify(values));
-            dispatch(itemUpdate(formdata)).unwrap().then((response) => {
-                if (response.code === 200) {
-                    allItems();
-                    resetForm();
-                    setStoreImg('');
-                    setPreviewImg(null);
-                    changeModalState(false)
-                }
-            }).catch((err) => {
-                console.log(err);
-            })
+            dispatch(
+                itemUpdate({
+                    form: formdata,
+                    token: signin.token
+                })).unwrap().then((response) => {
+                    if (response.code === 200) {
+                        allItems();
+                        resetForm();
+                        setStoreImg('');
+                        setPreviewImg(null);
+                        changeModalState(false);
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                })
         }
     });
 
     function allCategories() {
-        dispatch(categoryFindAll())
-            .unwrap()
-            .then((response) => {
-                setCategoryData(response.data);
-            }).catch((err) => {
-                console.log('err:- ', err);
-            })
+        dispatch(categoryFindAll({ token: signin.token }))
     }
 
     const handleFiles = (data) => {
@@ -107,7 +104,7 @@ const UpdateModal = (props) => {
                             >
                                 <option value=''>Select category</option>
                                 {
-                                    categoryData.map((itr) => {
+                                    findAll.map((itr) => {
                                         return (
                                             <option
                                                 value={itr['_id']}

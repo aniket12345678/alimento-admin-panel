@@ -3,10 +3,11 @@ import { useFormik } from 'formik';
 import { Button, Form, Modal } from 'react-bootstrap'
 import * as yup from 'yup'
 import { categoryUpdate } from '../../slices/category.slice';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 const UpdateModal = (props) => {
     const dispatch = useDispatch();
+    const { signin } = useSelector((params) => params.authSlice);
     const { show, changeModalState, data, allCategories } = props;
 
     const [previewImg, setPreviewImg] = useState(null);
@@ -24,17 +25,19 @@ const UpdateModal = (props) => {
             const formdata = new FormData();
             formdata.append('attachments', storeImg);
             formdata.append('data', JSON.stringify(values));
-            dispatch(categoryUpdate(formdata)).unwrap().then((response) => {
-                if (response.code === 200) {
-                    allCategories();
-                    resetForm();
-                    setStoreImg('');
-                    setPreviewImg(null);
-                    changeModalState(false)
-                }
-            }).catch((err) => {
-                console.log(err);
-            })
+            dispatch(categoryUpdate({ form: formdata, token: signin.token }))
+                .unwrap()
+                .then((response) => {
+                    if (response.code === 200) {
+                        allCategories();
+                        resetForm();
+                        setStoreImg('');
+                        setPreviewImg(null);
+                        changeModalState(false)
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                })
         }
     });
 

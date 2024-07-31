@@ -4,27 +4,23 @@ import DataTable from 'react-data-table-component';
 
 import AddModal from '../components/categories/AddModal';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-    categoryDelete, categoryFindAll,
-    categoryFindOne, categoryResetFindOne
-} from '../slices/category.slice';
-import secureLocalStorage from 'react-secure-storage';
+import { categoryDelete, categoryFindAll } from '../slices/category.slice';
 import UpdateModal from '../components/categories/UpdateModal';
 
 const Categories = () => {
     const dispatch = useDispatch();
-    const { findAll, findOne } = useSelector((params) => params.categorySlice);
+    const { findAll } = useSelector((params) => params.categorySlice);
+    const { signin } = useSelector((params) => params.authSlice);
+    const [findOne, setFindOne] = useState({});
     const [modalState, setModalState] = useState(false);
     const [updateModalState, setUpdateModalState] = useState(false);
 
     useEffect(() => {
-        if (secureLocalStorage.getItem('loginStatus')) {
-            allCategories();
-        }
+        allCategories();
     }, []);
 
     function allCategories() {
-        dispatch(categoryFindAll())
+        dispatch(categoryFindAll({ token: signin.token }))
     }
 
     function changeModalState(params) {
@@ -32,13 +28,14 @@ const Categories = () => {
     }
 
     function updateRecord(data) {
+        setFindOne(findAll.find((x) => x['_id'] === data));
         setUpdateModalState(true);
-        dispatch(categoryFindOne({ id: data }))
     }
 
     function deleteRecord(data) {
         if (window.confirm('Do you want to delete this data?')) {
-            dispatch(categoryDelete({ id: data })).unwrap().then((response) => {
+            let deleteObj = { token: signin.token, main: { id: data } }
+            dispatch(categoryDelete(deleteObj)).unwrap().then((response) => {
                 allCategories();
             }).catch((err) => {
                 console.log('err:- ', err);
@@ -55,7 +52,7 @@ const Categories = () => {
             name: 'Image',
             selector: x => <img
                 width={38}
-                src={`${process.env.REACT_APP_BASE_URL}/categories/img/${x['_id']}`}
+                src={`${process.env.REACT_APP_BASE_URL}/categories/img/${x['_id']}?${Date.now()}`}
                 alt="category-image"
             />,
         },

@@ -10,18 +10,18 @@ import { itemDelete, itemFindAll, itemFindOne } from '../slices/item.slice';
 
 const Items = () => {
     const dispatch = useDispatch();
-    const { findAll, findOne } = useSelector((params) => params.itemSlice);
+    const { findAll } = useSelector((params) => params.itemSlice);
+    const [findOne, setFindOne] = useState({});
+    const { signin } = useSelector((params) => params.authSlice);
     const [modalState, setModalState] = useState(false);
     const [updateModalState, setUpdateModalState] = useState(false);
 
     useEffect(() => {
-        if (secureLocalStorage.getItem('loginStatus')) {
-            allItems();
-        }
+        allItems();
     }, []);
 
     const allItems = () => {
-        dispatch(itemFindAll({}))
+        dispatch(itemFindAll({ token: signin.token }))
     };
 
     function changeModalState(params) {
@@ -29,17 +29,19 @@ const Items = () => {
     }
 
     function updateRecord(data) {
+        setFindOne(findAll.find((x) => x.id === data));
         setUpdateModalState(true);
-        dispatch(itemFindOne({ id: data }))
     }
 
     function deleteRecord(data) {
         if (window.confirm('Do you want to delete this data?')) {
-            dispatch(itemDelete({ id: data })).unwrap().then((result) => {
-                allItems();
-            }).catch((err) => {
-                console.log('err:- ', err);
-            });
+            dispatch(itemDelete({ token: signin.token, main: { id: data } }))
+                .unwrap()
+                .then((result) => {
+                    allItems();
+                }).catch((err) => {
+                    console.log('err:- ', err);
+                });
         }
     }
 
@@ -60,7 +62,7 @@ const Items = () => {
             name: 'Image',
             selector: x => <img
                 width={38}
-                src={`${process.env.REACT_APP_BASE_URL}/items/img/${x['_id']}`}
+                src={`${process.env.REACT_APP_BASE_URL}/items/img/${x['_id']}?${Date.now()}`}
                 alt="item-image"
             />,
         },

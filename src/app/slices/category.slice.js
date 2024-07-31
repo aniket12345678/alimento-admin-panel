@@ -5,21 +5,26 @@ import { API } from "../middleware/api";
 const authToken = fetchAuthToken();
 
 export const categoryAdd = createAsyncThunk('/categories/add',
-    async (values) => {
+    async ({ form, token }) => {
         try {
-            const response = await API.post('/categories/add', values, authToken);
+            const response = await API.post('/categories/add', form, fetchAuthToken(token));
+            if (response.data.code === 200) {
+                toastMessage('success', response.data.message);
+            }
             return response.data;
         } catch (error) {
-            console.log('error:- ', error);
+            console.log('categoryAdd -> slice -> error');
+            toastMessage('error', 'We are facing some technical issue');
+            const errorObj = { ...error }
+            throw errorObj;
         }
     }
 );
 
 export const categoryUpdate = createAsyncThunk('/categories/update',
-    async (values) => {
+    async ({ form, token }) => {
         try {
-            console.log('categoryUpdate values:- ', values);
-            const response = await API.post('/categories/update', values, authToken);
+            const response = await API.post('/categories/update', form, fetchAuthToken(token));
             if (response.data.code === 200) {
                 toastMessage('success', response.data.message);
             }
@@ -34,9 +39,9 @@ export const categoryUpdate = createAsyncThunk('/categories/update',
 );
 
 export const categoryFindAll = createAsyncThunk('/categories/find/all',
-    async () => {
+    async ({ token }) => {
         try {
-            const response = await API.get('/categories/find/all', authToken);
+            const response = await API.get('/categories/find/all', fetchAuthToken(token));
             return response.data;
         } catch (error) {
             console.log('categoryFindAll -> slice -> error');
@@ -62,9 +67,9 @@ export const categoryFindOne = createAsyncThunk('/categories/find/one',
 );
 
 export const categoryDelete = createAsyncThunk('/categories/delete',
-    async (values) => {
+    async ({ main, token }) => {
         try {
-            const response = await API.post('/categories/delete', values, authToken);
+            const response = await API.post('/categories/delete', main, fetchAuthToken(token));
             if (response.data.code === 200) {
                 toastMessage('success', response.data.message);
             }

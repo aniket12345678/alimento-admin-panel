@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 import secureLocalStorage from 'react-secure-storage';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useFormik } from 'formik';
 import * as yup from 'yup'
 
@@ -12,15 +12,14 @@ import { adminAuthCheck } from '../../config/AuthCheck';
 const AddModal = (props) => {
     const { show, changeModalState, allItems } = props;
     const dispatch = useDispatch();
+    const { signin } = useSelector((params) => params.authSlice);
 
     const [categoryData, setCategoryData] = useState([]);
     const [previewImg, setPreviewImg] = useState(null);
     const [storeImg, setStoreImg] = useState('');
 
     useEffect(() => {
-        if (secureLocalStorage.getItem('loginStatus')) {
-            allCategories();
-        }
+        allCategories();
     }, []);
 
     const validateFields = yup.object().shape({
@@ -40,27 +39,25 @@ const AddModal = (props) => {
             const formdata = new FormData();
             formdata.append('attachments', storeImg);
             formdata.append('data', JSON.stringify(values));
-            dispatch(itemAdd(formdata)).unwrap().then((response) => {
-                if (response.code === 200) {
-                    allItems()
-                    resetForm();
-                    setStoreImg('');
-                    setPreviewImg(null);
-                    changeModalState(false)
-                }
-                console.log('response:- ', response);
-            }).catch((err) => {
-                console.log(err);
-            })
+            dispatch(itemAdd({ form: formdata, token: signin.token }))
+                .unwrap()
+                .then((response) => {
+                    if (response.code === 200) {
+                        allItems()
+                        resetForm();
+                        setStoreImg('');
+                        setPreviewImg(null);
+                        changeModalState(false)
+                    }
+                    console.log('response:- ', response);
+                }).catch((err) => {
+                    console.log(err);
+                })
         }
     });
 
-
-
     function allCategories() {
-        dispatch(categoryFindAll({
-            user_id: JSON.parse(secureLocalStorage.getItem('loginStatus')).id
-        }))
+        dispatch(categoryFindAll({ token: signin.token }))
             .unwrap()
             .then((response) => {
                 setCategoryData(response.data);

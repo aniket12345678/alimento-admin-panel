@@ -5,26 +5,32 @@ import { API } from "../middleware/api";
 const authToken = fetchAuthToken();
 
 export const itemAdd = createAsyncThunk('/items/add',
-    async (values) => {
+    async ({ form, token }) => {
         try {
-            const response = await API.post('/items/add', values, authToken);
-            return response.data
-        } catch (error) {
-            console.log('error itemAdd:- ', error);
-        }
-    }
-);
-
-export const itemUpdate = createAsyncThunk('/items/update',
-    async (values) => {
-        try {
-            const response = await API.post('/items/update', values, authToken);
+            const response = await API.post('/items/add', form, fetchAuthToken(token));
             if (response.data.code === 200) {
                 toastMessage('success', response.data.message);
             }
             return response.data
         } catch (error) {
-            console.log('categoryUpdate -> slice -> error');
+            console.log('itemUpdate -> slice -> error');
+            toastMessage('error', 'We are facing some technical issue');
+            const errorObj = { ...error }
+            throw errorObj;
+        }
+    }
+);
+
+export const itemUpdate = createAsyncThunk('/items/update',
+    async ({ form, token }) => {
+        try {
+            const response = await API.post('/items/update', form, fetchAuthToken(token));
+            if (response.data.code === 200) {
+                toastMessage('success', response.data.message);
+            }
+            return response.data
+        } catch (error) {
+            console.log('itemUpdate -> slice -> error');
             toastMessage('error', 'We are facing some technical issue');
             const errorObj = { ...error }
             throw errorObj;
@@ -33,9 +39,9 @@ export const itemUpdate = createAsyncThunk('/items/update',
 );
 
 export const itemFindAll = createAsyncThunk('/items/find/all',
-    async (values) => {
+    async ({ token }) => {
         try {
-            const response = await API.post('/items/find/all', values, authToken);
+            const response = await API.post('/items/find/all', {}, fetchAuthToken(token));
             return response.data;
         } catch (error) {
             console.log('itemFindAll -> slice -> error');
@@ -61,9 +67,9 @@ export const itemFindOne = createAsyncThunk('/items/find/one',
 );
 
 export const itemDelete = createAsyncThunk('/items/delete',
-    async (values) => {
+    async ({ main, token }) => {
         try {
-            const response = await API.post('/items/delete', values, authToken);
+            const response = await API.post('/items/delete', main, fetchAuthToken(token));
             if (response.data.code === 200) {
                 toastMessage('success', response.data.message);
             }

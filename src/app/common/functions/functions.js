@@ -1,10 +1,11 @@
+import { useSelector } from "react-redux";
 import secureLocalStorage from "react-secure-storage";
 import { toast } from 'react-toastify';
 
-function fetchAuthToken() {
+function fetchAuthToken(data) {
     return {
         headers: {
-            Authorization: secureLocalStorage.getItem('authToken')
+            Authorization: data
         }
     }
 }

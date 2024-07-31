@@ -1,21 +1,14 @@
 import { useFormik } from 'formik'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Form } from 'react-bootstrap'
 import { Link, useNavigate } from 'react-router-dom'
 import * as yup from 'yup'
 import { authSignup } from '../../slices/auth.slice'
 import { useDispatch } from 'react-redux'
-import { adminAuthCheck } from '../../config/AuthCheck'
 
 const Signup = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-
-    // useEffect(() => {
-    //     if (adminAuthCheck.getAuthUser()) {
-    //         navigate('/dahsboard')
-    //     }
-    // }, [adminAuthCheck.getAuthUser()])
 
     const [signupMessage, setSignupMessage] = useState({
         color: '',

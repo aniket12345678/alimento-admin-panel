@@ -3,12 +3,13 @@ import { useFormik } from 'formik';
 import { Button, Form, Modal } from 'react-bootstrap'
 import * as yup from 'yup'
 import { adminAuthCheck } from '../../config/AuthCheck';
-import { categoryAdd } from '../../slices/category.slice';
-import { useDispatch } from 'react-redux';
+import { categoryAdd, categoryFindAll } from '../../slices/category.slice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const AddModal = (props) => {
     const { show, changeModalState } = props;
     const dispatch = useDispatch();
+    const { signin } = useSelector((params) => params.authSlice);
     const [previewImg, setPreviewImg] = useState(null);
     const [storeImg, setStoreImg] = useState('');
 
@@ -28,16 +29,14 @@ const AddModal = (props) => {
             const formdata = new FormData();
             formdata.append('attachments', storeImg);
             formdata.append('data', JSON.stringify(values));
-            dispatch(categoryAdd(formdata)).unwrap().then((response) => {
+            dispatch(categoryAdd({ form: formdata, token: signin.token })).unwrap().then((response) => {
                 if (response.code === 200) {
                     resetForm();
                     setStoreImg('');
                     setPreviewImg(null);
-                    changeModalState(false)
+                    dispatch(categoryFindAll({ token: signin.token }));
+                    changeModalState(false);
                 }
-                console.log('response:- ', response);
-            }).catch((err) => {
-                console.log(err);
             })
         }
     });

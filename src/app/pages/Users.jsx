@@ -9,11 +9,11 @@ import { userFindAll } from '../slices/user.slice';
 const Users = () => {
     const dispatch = useDispatch();
     const { findAll } = useSelector((x) => x.userSlice);
-    useEffect(() => {
-        if (secureLocalStorage.getItem('loginStatus')) {
-            allUsers();
-        }
-    }, []);
+    // useEffect(() => {
+    //     if (secureLocalStorage.getItem('loginStatus')) {
+    //         allUsers();
+    //     }
+    // }, []);
 
     function allUsers() {
         dispatch(userFindAll())

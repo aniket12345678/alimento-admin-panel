@@ -1,9 +1,19 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { categoryFindAll } from '../slices/category.slice';
+import { itemFindAll } from '../slices/item.slice';
 
 const Dashboard = () => {
-    const data = useSelector((x) => x);
-    console.log('data:- ', data);
+    const dispatch = useDispatch();
+    const { signin } = useSelector((params) => params.authSlice);
+    const { findAll: findAllCategory } = useSelector((x) => x.categorySlice);
+    const { findAll: findAllItems } = useSelector((x) => x.itemSlice);
+
+    useEffect(() => {
+        dispatch(categoryFindAll({ token: signin.token }));
+        dispatch(itemFindAll({ token: signin.token }));
+    }, []);
+
     return (
         <>
             <div className="pagetitle">
@@ -41,8 +51,7 @@ const Dashboard = () => {
                                                 <i className="bi bi-cart" />
                                             </div>
                                             <div className="ps-3">
-                                                <h6>145</h6>
-                                                <span className="text-success small pt-1 fw-bold">12%</span> <span className="text-muted small pt-2 ps-1">increase</span>
+                                                <h6>{findAllCategory.length}</h6>
                                             </div>
                                         </div>
                                     </div>
@@ -52,7 +61,10 @@ const Dashboard = () => {
                             <div className="col-xxl-4 col-md-6">
                                 <div className="card info-card revenue-card">
                                     <div className="filter">
-                                        <a className="icon" href="#" data-bs-toggle="dropdown"><i className="bi bi-three-dots" /></a>
+                                        <a
+                                            className="icon" href="#" data-bs-toggle="dropdown"><i className="bi bi-three-dots"
+                                            />
+                                        </a>
                                         <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
                                             <li className="dropdown-header text-start">
                                                 <h6>Filter</h6>
@@ -65,12 +77,13 @@ const Dashboard = () => {
                                     <div className="card-body">
                                         <h5 className="card-title">Items</h5>
                                         <div className="d-flex align-items-center">
-                                            <div className="card-icon rounded-circle d-flex align-items-center justify-content-center">
+                                            <div
+                                                className="card-icon rounded-circle d-flex align-items-center justify-content-center"
+                                            >
                                                 <i className="bi bi-currency-dollar" />
                                             </div>
                                             <div className="ps-3">
-                                                <h6>$3,264</h6>
-                                                <span className="text-success small pt-1 fw-bold">8%</span> <span className="text-muted small pt-2 ps-1">increase</span>
+                                                <h6>{findAllItems.length}</h6>
                                             </div>
                                         </div>
                                     </div>
