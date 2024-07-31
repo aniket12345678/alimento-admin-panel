@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react'
 import { Col, Row, Card, Button } from 'react-bootstrap';
 import DataTable from 'react-data-table-component';
 import { useDispatch, useSelector } from 'react-redux';
-import secureLocalStorage from 'react-secure-storage';
 
 import AddModal from '../components/items/AddModal';
 import UpdateModal from '../components/items/UpdateModal';
-import { itemDelete, itemFindAll, itemFindOne } from '../slices/item.slice';
+import { itemDelete, itemFindAll } from '../slices/item.slice';
 
 const Items = () => {
     const dispatch = useDispatch();

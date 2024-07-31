@@ -2,8 +2,6 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { fetchAuthToken, toastMessage } from "../common/functions/functions";
 import { API } from "../middleware/api";
 
-const authToken = fetchAuthToken();
-
 export const categoryAdd = createAsyncThunk('/categories/add',
     async ({ form, token }) => {
         try {
@@ -52,20 +50,6 @@ export const categoryFindAll = createAsyncThunk('/categories/find/all',
     }
 );
 
-export const categoryFindOne = createAsyncThunk('/categories/find/one',
-    async (values) => {
-        try {
-            const response = await API.post('/categories/find/one', values, authToken)
-            return response.data
-        } catch (error) {
-            console.log('categoryFindOne -> slice -> error');
-            toastMessage('error', 'We are facing some technical issue');
-            const errorObj = { ...error }
-            throw errorObj;
-        }
-    }
-);
-
 export const categoryDelete = createAsyncThunk('/categories/delete',
     async ({ main, token }) => {
         try {
@@ -83,19 +67,8 @@ export const categoryDelete = createAsyncThunk('/categories/delete',
     }
 );
 
-export const categoryResetFindOne = createAsyncThunk('/categories/delete',
-    () => {
-        return {};
-    }
-);
-
 const initialState = {
     findAll: [],
-    findOne: {
-        _id: '',
-        category: '',
-        category_img: ''
-    }
 }
 
 export const categorySlice = createSlice({
@@ -105,12 +78,6 @@ export const categorySlice = createSlice({
     extraReducers: (builder) => {
         builder.addCase(categoryFindAll.fulfilled, (state, action) => {
             state.findAll = action.payload.data;
-        });
-        builder.addCase(categoryFindOne.fulfilled, (state, action) => {
-            state.findOne = action.payload.data;
-        });
-        builder.addCase(categoryResetFindOne.fulfilled, (state, action) => {
-            state.findOne = {};
         });
     }
 });
