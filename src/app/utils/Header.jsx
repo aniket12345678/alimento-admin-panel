@@ -7,12 +7,12 @@ import { logout } from '../slices/auth.slice';
 const Header = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    
+
     const handleLogout = () => {
         dispatch(logout());
         navigate('/');
     }
-    
+
     return (
         <header id="header" className="header fixed-top d-flex align-items-center">
             <div className="d-flex align-items-center justify-content-between">

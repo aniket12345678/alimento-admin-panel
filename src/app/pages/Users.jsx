@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import secureLocalStorage from 'react-secure-storage';
 import { useDispatch, useSelector } from 'react-redux';
 import { Row, Col, Card } from 'react-bootstrap';
 import DataTable from 'react-data-table-component';
@@ -9,11 +8,6 @@ import { userFindAll } from '../slices/user.slice';
 const Users = () => {
     const dispatch = useDispatch();
     const { findAll } = useSelector((x) => x.userSlice);
-    // useEffect(() => {
-    //     if (secureLocalStorage.getItem('loginStatus')) {
-    //         allUsers();
-    //     }
-    // }, []);
 
     function allUsers() {
         dispatch(userFindAll())

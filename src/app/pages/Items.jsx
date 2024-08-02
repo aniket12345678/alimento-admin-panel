@@ -1,17 +1,18 @@
-import React, { useEffect, useState } from 'react'
-import { Col, Row, Card, Button } from 'react-bootstrap';
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import DataTable from 'react-data-table-component';
 import { useDispatch, useSelector } from 'react-redux';
+import { Col, Row, Card, Button } from 'react-bootstrap';
 
 import AddModal from '../components/items/AddModal';
+import ItemTable from '../components/items/ItemTable';
 import UpdateModal from '../components/items/UpdateModal';
 import { itemDelete, itemFindAll } from '../slices/item.slice';
 
 const Items = () => {
     const dispatch = useDispatch();
     const { findAll } = useSelector((params) => params.itemSlice);
-    const [findOne, setFindOne] = useState({});
     const { signin } = useSelector((params) => params.authSlice);
+    const [findOne, setFindOne] = useState({});
     const [modalState, setModalState] = useState(false);
     const [updateModalState, setUpdateModalState] = useState(false);
 
@@ -23,16 +24,16 @@ const Items = () => {
         dispatch(itemFindAll({ token: signin.token }))
     };
 
-    function changeModalState(params) {
+    const changeModalState = (params) => {
         setModalState(params);
     }
 
-    function updateRecord(data) {
+    const updateRecord = (data) => {
         setFindOne(findAll.find((x) => x.id === data));
         setUpdateModalState(true);
     }
 
-    function deleteRecord(data) {
+    const deleteRecord = (data) => {
         if (window.confirm('Do you want to delete this data?')) {
             dispatch(itemDelete({ token: signin.token, main: { id: data } }))
                 .unwrap()
@@ -44,39 +45,10 @@ const Items = () => {
         }
     }
 
-    const columns = [
-        {
-            name: 'id',
-            selector: x => x.id,
-        },
-        {
-            name: 'Category',
-            selector: x => <strong>{x.category_id['category']}</strong>,
-        },
-        {
-            name: 'Item',
-            selector: x => <strong>{x.item}</strong>,
-        },
-        {
-            name: 'Image',
-            selector: x => <img
-                width={38}
-                src={`${process.env.REACT_APP_BASE_URL}/items/img/${x['_id']}?${Date.now()}`}
-                alt="item-image"
-            />,
-        },
-        {
-            name: 'Action',
-            selector: x => <div className='d-flex justify-content-between'>
-                <div>
-                    <Button variant='primary' onClick={() => updateRecord(x.id)}>Update</Button>
-                </div>
-                <div>
-                    <Button variant='danger' onClick={() => deleteRecord(x.id)}>Delete</Button>
-                </div>
-            </div>,
-        },
-    ];
+    const columns = useMemo(
+        () => ItemTable({ updateRecord, deleteRecord }),
+        [signin.token]
+    );
 
     return (
         <section className='section'>

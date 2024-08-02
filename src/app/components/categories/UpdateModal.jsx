@@ -62,7 +62,7 @@ const UpdateModal = (props) => {
                             type="text"
                             name='category'
                             placeholder="Category"
-                            value={values.category}
+                            value={values && values.category}
                             onChange={handleChange}
                         />
                         {errors.category && <div>{errors.category}</div>}
@@ -84,7 +84,7 @@ const UpdateModal = (props) => {
                         previewImg ?
                             <img src={previewImg} alt="" style={{ width: '140px', height: '160px' }} />
                             :
-                            <img
+                            values && <img
                                 src={`${process.env.REACT_APP_BASE_URL}/categories/img/${values['_id']}`}
                                 alt=""
                                 style={{ width: '140px', height: '160px' }}

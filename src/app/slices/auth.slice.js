@@ -1,5 +1,4 @@
 import { API } from "../middleware/api";
-import secureLocalStorage from "react-secure-storage";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 export const authSignup = createAsyncThunk('/admin/auth/signup', async (values) => {
@@ -29,9 +28,9 @@ export const authSlice = createSlice({
     name: 'authSlice',
     initialState: {
         signin: {
-            token: secureLocalStorage.getItem('authToken') || null,
-            user_id: (secureLocalStorage.getItem('loginStatus') && JSON.parse(secureLocalStorage.getItem('loginStatus')).user_id) || null,
-            isloggedIn: (secureLocalStorage.getItem('loginStatus') && JSON.parse(secureLocalStorage.getItem('loginStatus')).isloggedIn) || false
+            token: null,
+            user_id: null,
+            isloggedIn: false
         }
     },
     reducers: {
@@ -39,19 +38,16 @@ export const authSlice = createSlice({
             state.signin.isloggedIn = false;
             state.signin.user_id = null;
             state.signin.token = null;
-            secureLocalStorage.clear();
+            window.localStorage.clear();
         }
     },
     extraReducers: (builder) => {
         builder.addCase(authSignin.fulfilled, (state, action) => {
-            state.signin.isloggedIn = true;
-            state.signin.token = action.payload.auth_token;
-            state.signin.user_id = action.payload.user_id;
-            secureLocalStorage.setItem('loginStatus', JSON.stringify({
-                user_id: action.payload.user_id,
-                isloggedIn: true
-            }));
-            secureLocalStorage.setItem('authToken', action.payload.auth_token);
+            if (action.payload.code===200) {
+                state.signin.isloggedIn = true;
+                state.signin.token = action.payload.auth_token;
+                state.signin.user_id = action.payload.user_id;
+            }
         });
         builder.addCase(authSignup.fulfilled, (state, action) => {
             console.log('authSignup.fulfilled', action.payload);

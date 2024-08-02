@@ -1,14 +1,14 @@
 import React from 'react'
+import { useSelector } from 'react-redux';
 import { Navigate, Outlet } from 'react-router-dom';
-import secureLocalStorage from 'react-secure-storage'
 
 const ProtectedRoutes = () => {
-    const isLoggedIn = secureLocalStorage.getItem('loginStatus') &&
-        JSON.parse(secureLocalStorage.getItem('loginStatus')).isloggedIn;
+    const { signin } = useSelector((x) => x.authSlice);
+    const { isloggedIn } = signin;
     return (
         <div>
             {
-                isLoggedIn ? <Outlet /> : <Navigate to='/' />
+                isloggedIn ? <Outlet /> : <Navigate to='/' />
             }
         </div>
     )

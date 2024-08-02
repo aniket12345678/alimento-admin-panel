@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react'
 import * as yup from 'yup'
 import { useFormik } from 'formik';
 import { useDispatch, useSelector } from 'react-redux';
-import secureLocalStorage from 'react-secure-storage';
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
 
 import { categoryFindAll } from '../../slices/category.slice';

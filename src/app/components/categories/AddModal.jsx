@@ -23,9 +23,6 @@ const AddModal = (props) => {
         },
         validationSchema: validateFields,
         onSubmit: (values) => {
-            console.log('values:- ', values);
-            const { id } = adminAuthCheck.getAuthUser();
-            values.user_id = id;
             const formdata = new FormData();
             formdata.append('attachments', storeImg);
             formdata.append('data', JSON.stringify(values));

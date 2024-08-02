@@ -10,9 +10,11 @@ const Dashboard = () => {
     const { findAll: findAllItems } = useSelector((x) => x.itemSlice);
 
     useEffect(() => {
-        dispatch(categoryFindAll({ token: signin.token }));
-        dispatch(itemFindAll({ token: signin.token }));
-    }, []);
+        if (signin.isloggedIn) {
+            dispatch(categoryFindAll({ token: signin.token }));
+            dispatch(itemFindAll({ token: signin.token }));
+        }
+    }, [signin.isloggedIn]);
 
     return (
         <>

@@ -1,18 +1,21 @@
 import React, { useState } from 'react'
 import { useFormik } from 'formik';
-import { Link, useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux';
+import { Link, Navigate, useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from 'react-redux';
 import { Form } from 'react-bootstrap';
 
 import { authSignin } from '../../slices/auth.slice';
 import FormComponent from '../../components/FormComponent';
 import { initialState } from '../../validation/initialState';
 import { validateObj } from '../../validation/validationSchema';
-import authLayout from './AuthLayout';
+import AuthLayout from './AuthLayout';
 
 const Signin = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    
+    const { signin } = useSelector((x) => x.authSlice);
+    const { isloggedIn } = signin;
 
     const [signinMessage, setSigninMessage] = useState({
         color: '',
@@ -44,6 +47,10 @@ const Signin = () => {
             })
         }
     });
+
+    if (isloggedIn) {
+        return <Navigate to={'/dashboard'} />
+    }
 
     return (
         <>
@@ -92,4 +99,4 @@ const Signin = () => {
     )
 }
 
-export default authLayout(Signin);
+export default AuthLayout(Signin);

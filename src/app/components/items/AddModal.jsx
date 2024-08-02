@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Col, Form, Modal, Row } from 'react-bootstrap'
-import secureLocalStorage from 'react-secure-storage';
 import { useDispatch, useSelector } from 'react-redux';
 import { useFormik } from 'formik';
 import * as yup from 'yup'
@@ -34,8 +33,6 @@ const AddModal = (props) => {
         },
         validationSchema: validateFields,
         onSubmit: (values) => {
-            const { id } = adminAuthCheck.getAuthUser();
-            values.user_id = id;
             const formdata = new FormData();
             formdata.append('attachments', storeImg);
             formdata.append('data', JSON.stringify(values));

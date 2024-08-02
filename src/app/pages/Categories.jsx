@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import { Row, Col, Card, Button } from 'react-bootstrap';
 import DataTable from 'react-data-table-component';
+import { useDispatch, useSelector } from 'react-redux';
+import { Row, Col, Card, Button } from 'react-bootstrap';
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import AddModal from '../components/categories/AddModal';
-import { useDispatch, useSelector } from 'react-redux';
-import { categoryDelete, categoryFindAll } from '../slices/category.slice';
 import UpdateModal from '../components/categories/UpdateModal';
+import CategoryTable from '../components/categories/CategoryTable';
+import { categoryDelete, categoryFindAll } from '../slices/category.slice';
 
 const Categories = () => {
     const dispatch = useDispatch();
@@ -19,55 +20,33 @@ const Categories = () => {
         allCategories();
     }, []);
 
-    function allCategories() {
+    const allCategories = () => {
         dispatch(categoryFindAll({ token: signin.token }))
     }
 
-    function changeModalState(params) {
+    const changeModalState = (params) => {
         setModalState(params);
     }
 
-    function updateRecord(data) {
+    const updateRecord = useCallback((data) => {
         setFindOne(findAll.find((x) => x['_id'] === data));
         setUpdateModalState(true);
-    }
+    }, [findAll]);
 
-    function deleteRecord(data) {
+    const deleteRecord = useCallback((data) => {
         if (window.confirm('Do you want to delete this data?')) {
-            let deleteObj = { token: signin.token, main: { id: data } }
-            dispatch(categoryDelete(deleteObj)).unwrap().then((response) => {
-                allCategories();
-            }).catch((err) => {
-                console.log('err:- ', err);
-            });
+            dispatch(categoryDelete({ token: signin.token, main: { id: data } }))
+                .unwrap()
+                .then((response) => {
+                    allCategories();
+                }).catch((err) => {
+                    console.log('err:- ', err);
+                });
         }
-    }
+    }, []);
 
-    const columns = [
-        {
-            name: 'Category',
-            selector: x => <strong>{x.category}</strong>,
-        },
-        {
-            name: 'Image',
-            selector: x => <img
-                width={38}
-                src={`${process.env.REACT_APP_BASE_URL}/categories/img/${x['_id']}?${Date.now()}`}
-                alt="category-image"
-            />,
-        },
-        {
-            name: 'Action',
-            selector: x => <div className='d-flex justify-content-between'>
-                <div>
-                    <Button variant='primary' onClick={() => updateRecord(x._id)}>Update</Button>
-                </div>
-                <div>
-                    <Button variant='danger' onClick={() => deleteRecord(x.id)}>Delete</Button>
-                </div>
-            </div>,
-        },
-    ];
+    const columns = useMemo(() => CategoryTable({ updateRecord, deleteRecord }), [signin.token]);
+
 
     return (
         <section className='section'>
