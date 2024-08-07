@@ -1,46 +1,52 @@
-import React, { useState } from 'react'
-import PropTypes from 'prop-types'
-import { Row, Col, Card, Button } from 'react-bootstrap';
 import DataTable from 'react-data-table-component';
+import { useDispatch, useSelector } from 'react-redux';
+import { Row, Col, Card, Button } from 'react-bootstrap';
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
 import AddModal from '../components/categories/AddModal';
-import { useSelector } from 'react-redux';
-
-const columns = [
-    {
-        name: 'id',
-        selector: x => x.id,
-    },
-    {
-        name: 'Title',
-        selector: x => <strong>{x.title}</strong>,
-    },
-    {
-        name: 'Year',
-        selector: row => <strong>{row.year}</strong>,
-    },
-];
-
-const tableData = [
-    {
-        id: 1,
-        title: 'Beetlejuice',
-        year: '1988',
-    },
-    {
-        id: 2,
-        title: 'Ghostbusters',
-        year: '1984',
-    },
-]
+import UpdateModal from '../components/categories/UpdateModal';
+import CategoryTable from '../components/categories/CategoryTable';
+import { categoryDelete, categoryFindAll } from '../slices/category.slice';
 
 const Categories = () => {
-    const data = useSelector((params) => params.categorySlice);
+    const dispatch = useDispatch();
+    const { findAll } = useSelector((params) => params.categorySlice);
+    const { signin } = useSelector((params) => params.authSlice);
+    const [findOne, setFindOne] = useState({});
     const [modalState, setModalState] = useState(false);
+    const [updateModalState, setUpdateModalState] = useState(false);
 
-    function changeModalState(params) {
+    useEffect(() => {
+        allCategories();
+    }, []);
+
+    const allCategories = () => {
+        dispatch(categoryFindAll({ token: signin.token }))
+    }
+
+    const changeModalState = (params) => {
         setModalState(params);
     }
+
+    const updateRecord = useCallback((data) => {
+        setFindOne(findAll.find((x) => x['_id'] === data));
+        setUpdateModalState(true);
+    }, [findAll]);
+
+    const deleteRecord = useCallback((data) => {
+        if (window.confirm('Do you want to delete this data?')) {
+            dispatch(categoryDelete({ token: signin.token, main: { id: data } }))
+                .unwrap()
+                .then((response) => {
+                    allCategories();
+                }).catch((err) => {
+                    console.log('err:- ', err);
+                });
+        }
+    }, []);
+
+    const columns = useMemo(() => CategoryTable({ updateRecord, deleteRecord }), [signin.token]);
+
 
     return (
         <section className='section'>
@@ -55,13 +61,19 @@ const Categories = () => {
                         <Card.Body>
                             <DataTable
                                 columns={columns}
-                                data={tableData}
+                                data={findAll}
                             />
                         </Card.Body>
                     </Card>
                 </Col>
             </Row>
             <AddModal show={modalState} changeModalState={changeModalState} />
+            <UpdateModal
+                data={findOne}
+                show={updateModalState}
+                allCategories={allCategories}
+                changeModalState={setUpdateModalState}
+            />
         </section>
     )
 }

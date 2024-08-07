@@ -2,39 +2,42 @@ import React, { useState } from 'react'
 import { useFormik } from 'formik';
 import { Button, Form, Modal } from 'react-bootstrap'
 import * as yup from 'yup'
-import { adminAuthCheck } from '../../config/AuthCheck';
-import { categoryAdd, categoryFindAll } from '../../slices/category.slice';
+import { categoryUpdate } from '../../slices/category.slice';
 import { useDispatch, useSelector } from 'react-redux';
 
-const AddModal = (props) => {
-    const { show, changeModalState } = props;
+const UpdateModal = (props) => {
     const dispatch = useDispatch();
     const { signin } = useSelector((params) => params.authSlice);
+    const { show, changeModalState, data, allCategories } = props;
+
     const [previewImg, setPreviewImg] = useState(null);
     const [storeImg, setStoreImg] = useState('');
 
     const validateFields = yup.object().shape({
         category: yup.string().required('Enter category'),
-    })
+    });
 
     const { values, errors, handleChange, handleSubmit, resetForm } = useFormik({
-        initialValues: {
-            category: '',
-        },
+        initialValues: data,
         validationSchema: validateFields,
+        enableReinitialize: true,
         onSubmit: (values) => {
             const formdata = new FormData();
             formdata.append('attachments', storeImg);
             formdata.append('data', JSON.stringify(values));
-            dispatch(categoryAdd({ form: formdata, token: signin.token })).unwrap().then((response) => {
-                if (response.code === 200) {
-                    resetForm();
-                    setStoreImg('');
-                    setPreviewImg(null);
-                    dispatch(categoryFindAll({ token: signin.token }));
-                    changeModalState(false);
-                }
-            })
+            dispatch(categoryUpdate({ form: formdata, token: signin.token }))
+                .unwrap()
+                .then((response) => {
+                    if (response.code === 200) {
+                        allCategories();
+                        resetForm();
+                        setStoreImg('');
+                        setPreviewImg(null);
+                        changeModalState(false)
+                    }
+                }).catch((err) => {
+                    console.log(err);
+                })
         }
     });
 
@@ -50,7 +53,7 @@ const AddModal = (props) => {
     return (
         <Modal keyboard={false} backdrop='static' show={show} onHide={() => changeModalState(false)}>
             <Modal.Header closeButton>
-                <Modal.Title>Add Category</Modal.Title>
+                <Modal.Title>Update Category</Modal.Title>
             </Modal.Header>
             <Form onSubmit={handleSubmit}>
                 <Modal.Body>
@@ -59,7 +62,7 @@ const AddModal = (props) => {
                             type="text"
                             name='category'
                             placeholder="Category"
-                            value={values.category}
+                            value={values && values.category}
                             onChange={handleChange}
                         />
                         {errors.category && <div>{errors.category}</div>}
@@ -78,13 +81,19 @@ const AddModal = (props) => {
                         />
                     </Form.Group>
                     {
-                        previewImg &&
-                        <img src={previewImg} alt="" style={{ width: '140px', height: '160px' }} />
+                        previewImg ?
+                            <img src={previewImg} alt="" style={{ width: '140px', height: '160px' }} />
+                            :
+                            values && <img
+                                src={`${process.env.REACT_APP_BASE_URL}/categories/img/${values['_id']}`}
+                                alt=""
+                                style={{ width: '140px', height: '160px' }}
+                            />
                     }
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="success" type='submit'>
-                        Submit
+                        Update
                     </Button>
                 </Modal.Footer>
             </Form>
@@ -92,4 +101,4 @@ const AddModal = (props) => {
     )
 }
 
-export default AddModal
+export default UpdateModal

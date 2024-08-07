@@ -1,48 +1,55 @@
-import React, { useState } from 'react'
-// import PropTypes from 'prop-types'
-import { Col, Row, Card, Button } from 'react-bootstrap';
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import DataTable from 'react-data-table-component';
+import { useDispatch, useSelector } from 'react-redux';
+import { Col, Row, Card, Button } from 'react-bootstrap';
 
 import AddModal from '../components/items/AddModal';
-import { useSelector } from 'react-redux';
-
-const columns = [
-    {
-        name: 'id',
-        selector: x => x.id,
-    },
-    {
-        name: 'Title',
-        selector: x => <strong>{x.title}</strong>,
-    },
-    {
-        name: 'Year',
-        selector: row => <strong>{row.year}</strong>,
-    },
-];
-
-const tableData = [
-    {
-        id: 1,
-        title: 'Beetlejuice',
-        year: '1988',
-    },
-    {
-        id: 2,
-        title: 'Ghostbusters',
-        year: '1984',
-    },
-]
+import ItemTable from '../components/items/ItemTable';
+import UpdateModal from '../components/items/UpdateModal';
+import { itemDelete, itemFindAll } from '../slices/item.slice';
 
 const Items = () => {
-    const data = useSelector((params) => params.categorySlice);
-    console.log('data:- ', data);
-    
+    const dispatch = useDispatch();
+    const { findAll } = useSelector((params) => params.itemSlice);
+    const { signin } = useSelector((params) => params.authSlice);
+    const [findOne, setFindOne] = useState({});
     const [modalState, setModalState] = useState(false);
+    const [updateModalState, setUpdateModalState] = useState(false);
 
-    function changeModalState(params) {
+    useEffect(() => {
+        allItems();
+    }, []);
+
+    const allItems = () => {
+        dispatch(itemFindAll({ token: signin.token }))
+    };
+
+    const changeModalState = (params) => {
         setModalState(params);
     }
+
+    const updateRecord = (data) => {
+        setFindOne(findAll.find((x) => x.id === data));
+        setUpdateModalState(true);
+    }
+
+    const deleteRecord = (data) => {
+        if (window.confirm('Do you want to delete this data?')) {
+            dispatch(itemDelete({ token: signin.token, main: { id: data } }))
+                .unwrap()
+                .then((result) => {
+                    allItems();
+                }).catch((err) => {
+                    console.log('err:- ', err);
+                });
+        }
+    }
+
+    const columns = useMemo(
+        () => ItemTable({ updateRecord, deleteRecord }),
+        [signin.token]
+    );
+
     return (
         <section className='section'>
             <div className='mb-3'>
@@ -56,14 +63,19 @@ const Items = () => {
                         <Card.Body>
                             <DataTable
                                 columns={columns}
-                                data={tableData}
+                                data={findAll}
                             />
                         </Card.Body>
                     </Card>
                 </Col>
             </Row>
-            <AddModal show={modalState} changeModalState={changeModalState} />
-
+            <AddModal show={modalState} changeModalState={changeModalState} allItems={allItems} />
+            <UpdateModal
+                data={findOne}
+                allItems={allItems}
+                show={updateModalState}
+                changeModalState={setUpdateModalState}
+            />
         </section>
     )
 }

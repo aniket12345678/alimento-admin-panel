@@ -1,53 +1,83 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { fetchAuthToken, toastMessage } from "../common/functions/functions";
 import { API } from "../middleware/api";
 
-export const itemAdd = createAsyncThunk('/categories/add',
-    async (values) => {
+export const itemAdd = createAsyncThunk('/items/add',
+    async ({ form, token }) => {
         try {
-            const response = await API.post('/categories/add', values);
-            console.log('itemAdd', response);
+            const response = await API.post('/items/add', form, fetchAuthToken(token));
+            if (response.data.code === 200) {
+                toastMessage('success', response.data.message);
+            }
+            return response.data
         } catch (error) {
-            console.log('error itemAdd:- ', error);
+            console.log('itemUpdate -> slice -> error');
+            toastMessage('error', 'We are facing some technical issue');
+            const errorObj = { ...error }
+            throw errorObj;
         }
     }
 );
 
-export const itemFindAll = createAsyncThunk('/categories/find/all',
-    async (values) => {
+export const itemUpdate = createAsyncThunk('/items/update',
+    async ({ form, token }) => {
         try {
-            const response = await API.post('/categories/find/all', values);
-            console.log('itemFindAll:- ', response);
+            const response = await API.post('/items/update', form, fetchAuthToken(token));
+            if (response.data.code === 200) {
+                toastMessage('success', response.data.message);
+            }
+            return response.data
         } catch (error) {
-            console.log('error itemFindAll:- ', error);
+            console.log('itemUpdate -> slice -> error');
+            toastMessage('error', 'We are facing some technical issue');
+            const errorObj = { ...error }
+            throw errorObj;
         }
     }
 );
 
-export const itemFindOne = createAsyncThunk('/categories/delete',
-    async (values) => {
+export const itemFindAll = createAsyncThunk('/items/find/all',
+    async ({ token }) => {
         try {
-            const response = await API.post('/categories/delete', values);
-            console.log('itemFindOne:- ', response);
+            const response = await API.post('/items/find/all', {}, fetchAuthToken(token));
+            return response.data;
         } catch (error) {
-            console.log('error itemFindOne:- ', error);
+            console.log('itemFindAll -> slice -> error');
+            toastMessage('error', 'We are facing some technical issue');
+            const errorObj = { ...error }
+            throw errorObj;
+        }
+    }
+);
+
+export const itemDelete = createAsyncThunk('/items/delete',
+    async ({ main, token }) => {
+        try {
+            const response = await API.post('/items/delete', main, fetchAuthToken(token));
+            if (response.data.code === 200) {
+                toastMessage('success', response.data.message);
+            }
+            return response.data;
+        } catch (error) {
+            console.log('itemDelete -> slice -> error');
+            toastMessage('error', 'We are facing some technical issue');
+            const errorObj = { ...error }
+            throw errorObj;
         }
     }
 );
 
 const initialValues = {
-    findAll: []
+    findAll: [],
 }
 
 export const itemSlice = createSlice({
     name: 'itemSlice',
     initialState: initialValues,
     reducers: {},
-    extraReducers: () => {
-        itemFindAll.fulfilled = (state, action) => {
-            console.log('itemFindAll.fulfilled:- ', state);
-        }
-        itemFindOne.fulfilled = (state, action) => {
-            console.log('itemFindOne.fulfilled:- ', state);
-        }
+    extraReducers: (builder) => {
+        builder.addCase(itemFindAll.fulfilled, (state, action) => {
+            state.findAll = action.payload.data;
+        });
     }
 });
